@@ -1,0 +1,225 @@
+basePath: /
+definitions:
+  entities.Person:
+    description: Person information with age, gender and nationality
+    properties:
+      age:
+        type: integer
+      gender:
+        type: string
+      name:
+        type: string
+      nationality:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+    type: object
+  responses.FoundPerson:
+    properties:
+      data:
+        $ref: '#/definitions/entities.Person'
+      message:
+        type: string
+    type: object
+  responses.ResponseMessage:
+    properties:
+      id:
+        type: string
+      message:
+        type: string
+    type: object
+host: localhost:6060
+info:
+  contact: {}
+  description: API for managing people information
+  title: People Library API
+  version: 1.0.0
+paths:
+  /person:
+    post:
+      consumes:
+      - application/json
+      description: Create a person entity and enrich it with age, gender, and nationality
+        by name
+      parameters:
+      - description: Person object
+        in: body
+        name: person
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Person'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/responses.ResponseMessage'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new person
+      tags:
+      - People
+  /person/{id}:
+    delete:
+      description: Delete a single person from the database by their ID
+      parameters:
+      - description: Person ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/responses.ResponseMessage'
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete person by ID
+      tags:
+      - People
+    get:
+      description: Get a single person by their ID
+      parameters:
+      - description: Person ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/responses.FoundPerson'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get person by ID
+      tags:
+      - People
+    patch:
+      consumes:
+      - application/json
+      description: Update person's information by ID. Only provided fields will be
+        updated.
+      parameters:
+      - description: Person ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Person object with fields to update
+        in: body
+        name: person
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Person'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/responses.ResponseMessage'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Partially update an existing person
+      tags:
+      - People
+  /person/filter:
+    get:
+      description: Get a list of people filtered by parameters with pagination
+      parameters:
+      - description: Name to filter by
+        in: query
+        name: name
+        type: string
+      - description: Surname to filter by
+        in: query
+        name: surname
+        type: string
+      - description: Patronymic to filter by
+        in: query
+        name: patronymic
+        type: string
+      - description: Age to filter by
+        in: query
+        name: age
+        type: integer
+      - description: Gender to filter by
+        in: query
+        name: gender
+        type: string
+      - description: Nationality to filter by
+        in: query
+        name: nationality
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of results per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/responses.FoundPerson'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get people by filter
+      tags:
+      - People
+swagger: "2.0"
