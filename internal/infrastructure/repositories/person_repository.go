@@ -24,7 +24,11 @@ func (r *PersonRepository) UpdatePersonByID(id int, p entities.Person) error {
 
         return fmt.Errorf("failed to start transaction: %w", err)
     }
-    defer tx.Rollback()
+    defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
 
     var (
         currName, currSurname, currPatronymic sql.NullString
@@ -153,7 +157,11 @@ func (r *PersonRepository) CreatePerson(person entities.Person) (int, error) {
 		
         return 0, fmt.Errorf("failed to start transaction: %w", err)
     }
-    defer tx.Rollback()
+    defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
 
 	var genderID int
 	err = r.db.QueryRow(`SELECT id FROM genders WHERE gender = $1`, person.Gender).Scan(&genderID)
@@ -308,7 +316,11 @@ func (r *PersonRepository) DeletePersonByID(id int) error {
         return fmt.Errorf("failed to start transaction: %w", err)
 	}
 
-	defer tx.Rollback()
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
 
 	var genderID, nationalityID int
 
