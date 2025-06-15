@@ -164,7 +164,7 @@ func (r *PersonRepository) CreatePerson(person entities.Person) (int, error) {
 	}()
 
 	var genderID int
-	err = r.db.QueryRow(`SELECT id FROM genders WHERE gender = $1`, person.Gender).Scan(&genderID)
+	err = tx.QueryRow(`SELECT id FROM genders WHERE gender = $1`, person.Gender).Scan(&genderID)
 	if err != nil {
 		err = r.db.QueryRow(`INSERT INTO genders (gender) VALUES ($1) RETURNING id`, person.Gender).Scan(&genderID)
 		if err != nil {
@@ -174,7 +174,7 @@ func (r *PersonRepository) CreatePerson(person entities.Person) (int, error) {
 	}
 
 	var nationalityID int
-	err = r.db.QueryRow(`SELECT id FROM nationalities WHERE nationality = $1`, person.Nationality).Scan(&nationalityID)
+	err = tx.QueryRow(`SELECT id FROM nationalities WHERE nationality = $1`, person.Nationality).Scan(&nationalityID)
 	if err != nil {
 		err = r.db.QueryRow(`INSERT INTO nationalities (nationality) VALUES ($1) RETURNING id`, person.Nationality).Scan(&nationalityID)
 		if err != nil {
@@ -190,7 +190,7 @@ func (r *PersonRepository) CreatePerson(person entities.Person) (int, error) {
 	`
 
 	var id int
-	err = r.db.QueryRow(query,
+	err = tx.QueryRow(query,
 		person.Name,
 		person.Surname,
 		person.Patronymic,
@@ -324,26 +324,26 @@ func (r *PersonRepository) DeletePersonByID(id int) error {
 
 	var genderID, nationalityID int
 
-	err = r.db.QueryRow(`SELECT gender_id, nationality_id FROM people WHERE id = $1`, id).Scan(&genderID, &nationalityID)
+	err = tx.QueryRow(`SELECT gender_id, nationality_id FROM people WHERE id = $1`, id).Scan(&genderID, &nationalityID)
 	if err != nil {
 		Log.Info("Failed to get gender/nationality ID for person", "ID", id, "error", err)
 
 		return err
 	}
 
-	_, err = r.db.Exec(`DELETE FROM people WHERE id = $1`, id)
+	_, err = tx.Exec(`DELETE FROM people WHERE id = $1`, id)
 	if err != nil {
 		Log.Info("Failed to delete person", "ID", id, "error", err)
 
 		return err
 	}
 
-	_, _ = r.db.Exec(`
+	_, _ = tx.Exec(`
 		DELETE FROM genders 
 		WHERE id = $1
 		`, genderID)
 
-	_, _ = r.db.Exec(`
+	_, _ = tx.Exec(`
 		DELETE FROM nationalities 
 		WHERE id = $1
 		`, nationalityID)
